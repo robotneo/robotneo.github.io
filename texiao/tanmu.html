@@ -1,0 +1,307 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>index</title>
+    <meta charset="utf-8">
+    <meta name="Author" content="潭州学院-海牙">
+    <style type='text/css'>
+        * { margin: 0; padding: 0; }
+
+        html, body { height: 100%; }
+
+        body { overflow: hidden; background-color: #ffffff; }
+
+        .flex-column {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .flex-row {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .wrap {
+            overflow: hidden;
+            width: 70%;
+            height: 500px;
+            margin: 100px auto;
+            padding: 20px;
+            background-color: transparent;
+            box-shadow: 0 0 9px #222222;
+            border-radius: 20px;
+        }
+
+        .wrap .box {
+            position: relative;
+            width: 120%;
+            height: 90%;
+            background-color: #000000;
+            border-radius: 10px;
+        }
+
+        .wrap .box span {
+            position: absolute;
+			top:10px;
+			left:20px;
+            display: block;
+            padding: 10px;
+            color: #336688;
+        }
+
+        .wrap .send {
+            display: flex;
+            width: 120%;
+            height: 10%;
+            background-color: #000000;
+            border-radius: 8px;
+        }
+
+        .wrap .send input {
+            width: 40%;
+            height: 60%;
+            border: 0;
+            outline: 0;
+            border-radius: 5px 0 0 5px;
+            box-shadow: 0 0 5px #d9d9d9;
+            text-indent: 1em;
+        }
+
+        .wrap .send .send-btn {
+            width: 100px;
+            height: 60%;
+            background-color: #fe943b;
+            color: #ffffff;
+            text-align: center;
+            border-radius: 0 5px 5px 0;
+            line-height: 30px;
+            cursor: pointer;
+        }
+
+        .wrap .send .send-btn:hover {
+            background-color: #4cacdc;
+        }
+
+    </style>
+    <script src="http://cdn.bootcss.com/jquery/1.11.3/jquery.min.js"></script>
+
+</head>
+<body>
+<div class="wrap flex-column">
+
+    <div class="box">
+        <video src="video/1.mp4" width="100%" height="100%" autoplay></video>
+       
+    </div>
+    <div class="send flex-row">
+        <input type="text" placeholder="弹幕发送[]~(￣▽￣)~*" class="con">
+        <div class="send-btn">发送</div>
+    </div>
+</div>
+<script>
+	 /*
+		javaScript 基于原型的动态解释性脚本语言
+				
+				   原型 词法作用域 上下文
+			
+			前端中 能做什么
+				1.响应用户的操作 事件 键盘事件 鼠标事件
+				2.操作dom元素 增删改查 属性操作 样式等
+				3.数据交互 表单验证 ajax json jsonp 正则表达式
+				4.造轮子 mvvm mvc nodeJS jquery
+	 */
+     /*
+			需求分析
+				用户点击 发送按钮 把input中的内容展示到 box里面
+				
+				1.元素 .con .send-btn .box span(创建)
+				2.事件: 点击事件 键盘事件
+				3.行为
+					1. 点击 .send-btn 获取 .con内容
+						1. 规范发送信息
+						2.  禁止空 以及全空格
+						3. 存储 value值
+					2. 根据内容 动态生成 span标签
+						1.创建节点 document.createElement
+						2.改变节点内容 innerHTML
+						3. 节点 生成初始化 位置等
+						4.标签添加到 oBox appendChild
+					3. message运动
+						1.改变元素的left值
+						2.定时器改变 setInterval
+						3. this代表当前弹幕
+						4. 弹幕left = 当前left - 1
+					4. 随机参数
+						Math.random 0-1 包括0 不包括1
+						1. top
+						2. color
+						3. fontSize
+						4. textShadow
+						5. timing 运动曲线
+							1.linear
+							2.ease-out
+					5. 业务完善 
+						1. 过去的删除掉
+							1.停止定时器
+							2.删除自身
+							3.终止函数
+						2. 完善回车输入
+							1.在oCon上回车 发送弹幕
+			1. 获取元素
+		
+	 */
+	 
+		var oBox = document.querySelector('.box'); //获取.box元素
+		var oCon = document.querySelector('.con'); //获取input框
+		var oBtn = document.querySelector('.send-btn');//获取发送按钮
+		var cW = oBox.offsetWidth; //获取box的宽度
+		var cH = oBox.offsetHeight; //获取box的高度
+		var message = ''; //弹幕内容初始化
+		// 谁 在什么时候||触发了什么事件 谁做了什么事情
+		// oBtn        .onclick           function(){}
+		oBtn.onclick =  send; //点击发送
+		oCon.onkeydown = function(e){
+			e = e||window.event;
+			if(e.keyCode === 13){ //回车键
+				send();
+			}
+		
+		}
+
+		function send(){
+			//获取 oCon的内容
+			if(oCon.value.length <= 0 || (/^\s+$/).test(oCon.value)){
+				alert('请输入弹幕内容');
+				return false; //终止函数执行
+			}
+			message = oCon.value;
+			console.log(message)
+			//生成标签 
+			createEle(message); //执行节点创建模块
+			oCon.value = ''; //收尾工作清空输入框
+		}
+		function createEle(txt){ //动态生成span标签
+			var oMessage = document.createElement('span'); //创建标签
+			oMessage.innerHTML = txt; //接受参数txt并且替换内容
+			oMessage.style.left = cW  +'px'; //初始化生成位置 x
+			oBox.appendChild(oMessage); //把标签塞到oBox里面
+			roll.call(oMessage,{//call改变函数内部this的指向
+				timing:['linear','ease-out'][~~(Math.random()*2)],
+				color:'#'+(~~(Math.random()*(1<<24))).toString(16),
+				top:random(0,cH),
+				fontSize:random(16,32)
+			}); 
+		}	
+		
+		function roll(opt){ //弹幕滚动
+			//如果 对象中不存在timing  初始化
+			opt.timing = opt.timing || 'linear';
+			opt.color = opt.color || '#fff';
+			opt.top = opt.top || 0;
+			opt.fontSize = opt.fontSize || 16;
+			this._left = parseInt(this.offsetLeft); //获取当前 left值
+			this.style.color = opt.color; //初始化颜色
+			this.style.top = opt.top + 'px';
+			this.style.fontSize = opt.fontSize +'px';
+			this.timer = setInterval(function(){
+				if(this._left <= 100){ //
+					clearInterval(this.timer);//终止定时器
+					this.parentNode.removeChild(this);
+					return;  //终止函数
+				}
+				switch (opt.timing){
+					case 'linear': //如果匀速
+						this._left += -2;
+						break;
+					case 'ease-out': 
+						this._left +=  (0 - this._left)*.01;
+						break;
+				}
+				
+				this.style.left = this._left + 'px';
+			}.bind(this),1000/60);
+		}
+		function random(start,end){ //随机数封装
+			return start + ~~(Math.random()*(end-start));
+		}
+	
+		var aLi = document.querySelectorAll('li'); //10
+
+		function forEach(ele,cb){
+			for(var i=0,len=aLi.length;i<len;i++){
+				cb&&cb(ele[i],i);
+			}
+		}
+		forEach(aLi,function(ele,i){
+			ele.style.left = i* 100 +'px';
+		})
+		//产生闭包
+		
+		var obj={
+			num:1,
+			add:function(){
+				this.num++; //obj.num = 2;
+				(function(){
+					console.log(this.num); // und
+				})()
+			}
+		}
+		obj.add(); // windw
+</script>
+</body>
+</html>
+
+<!-- 
+	getElementById id
+	getELementsByClassName class
+	getElementsByTagName tag
+	
+	querySelector 获取单一的元素
+	querySelectorAll
+
+	h5 api
+	
+
+	/^\s+$/
+	
+	\
+	this 在函数调用的时候 指向调用函数的主体对象
+	window
+
+	call 函数执行的时候改变内部this的指向 主动执行 函数();
+	bind 延迟触发函数的内部this硬绑定到执行环境内 被动执行
+
+	['linear','ease-out'][1.222]
+	Math.random()*2 
+	Math.floor()
+	~~
+
+	'#'+(~~(Math.random()*(1<<24))).toString(16)
+
+	16 hex 000000 
+	
+	ffffff 16 => 10 16777215 =>> 2 
+	1<<24
+
+
+	1.学习方向
+			初级[方法,对象,事件,数组,控制流程[if for switch],数组,工具,string,number,函数]
+			中级[迭代,递归,函数,词法作用域,作用域链,高级函数,参数形参实参,agruments对象,回调函数,二次穿参,数组高级应用,闭包,ajax,json,jsonDOM解析,event对象高级应用,上下文,this,call,apply,bind,对象,封装,继承,多态,面向对象,原型,原型链,原型开发,IIFE,设计模式]
+
+		
+		1. web生产环境
+			1.http 
+			2.前端高并发处理机制
+		2.原理 成长价值
+			
+		3.逻辑
+						
+		
+		数据 通信 逻辑 业务
+
+		(function(){})() IIFE 匿名函数自执行体 window
+-->

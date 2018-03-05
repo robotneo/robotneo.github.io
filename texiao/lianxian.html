@@ -1,0 +1,564 @@
+<!doctype html>
+<html>
+	<head>
+		<title>连线游戏</title>
+		<meta charset='utf-8'>
+		<style>
+		@keyframes jumping {
+  0%    {transform:scale(2);}
+  100%  {transform:scale(1);}
+}
+
+@keyframes dotReveal {
+  to  {opacity:1;}
+}
+
+@keyframes line {
+  0%    {stroke-dashoffset:0}
+  100%    {stroke-dashoffset:100%}
+}
+
+body {
+  cursor:crosshair;
+  background-color: black;
+  background-image: linear-gradient(to top, rgba(46, 204, 113,0.2) 1%, rgba(255,255,255,0) 0),
+                    linear-gradient(to right, rgba(46, 204, 113,0.2) 1%, rgba(255,255,255,0) 0);
+  background-size: 50px 50px;
+}
+
+svg, html, body, #app  {
+  box-sizing: border-box;
+  height:100%;
+  width:100%;
+  padding:0;
+  margin:0;
+  overflow:hidden;
+}
+
+svg {position: relative;z-index:1;}
+
+.dot {
+  z-index:10;
+  stroke-width:4;
+  stroke:black;
+  width: 10px;
+  height: 10px;
+  fill: rgba(241, 196, 15,1.0);
+  -moz-transform-origin: center;
+  -webkit-transform-origin: center;
+  transform-origin: center;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.320, 1.275);
+}
+
+.dot--starting.dot--starting {
+  fill:black;
+  stroke: rgba(46, 204, 113,1.0);
+  stroke-width:3;
+  stroke-miterlimit: outside;
+}
+
+.dot:not(.dot--starting) {
+  opacity:0;
+  animation: dotReveal 1s linear;
+  animation-fill-mode: forwards;
+}
+
+#svg  .dot:hover {
+  transform: scale(2);
+}
+
+#svg .dot[data-selected=true] {
+  opacity:1;
+  fill: rgba(46, 204, 113,1.0);
+  animation: jumping 0.5s ease-in-out alternate infinite;
+  animation-delay:0;
+}
+
+#svg  .dot[data-visited=true] {
+  fill:rgba(46, 204, 113,1.0);
+  animation: jumping 0.5s ease-in-out alternate infinite;
+  animation-delay:0;
+  opacity:1;
+}
+
+.line {
+  z-index:10;
+  stroke: rgba(46, 204, 113,1.0);
+  stroke-width:2;
+  stroke-dasharray: 2 16;
+  animation: line 10s linear infinite;
+}
+
+@media (max-width:480px) { 
+  #preline {
+    display: none;
+  }
+}
+
+#score {
+  position: fixed;
+  z-index:0;
+  top: 50%;
+  left:50%;
+  width: 100%;
+  text-align:center;
+  transform: translate(-50%, -50%);
+  font-size:20em;
+  color: rgba(46, 204, 113,0.2);
+  font-family: 'Bungee Outline', cursive;
+}
+
+.btn {
+  background: transparent;
+  cursor:pointer;
+  color:rgba(241, 196, 15,1.0);
+  font-weight:bold;
+  padding: 15px 60px;
+  border-radius: 6px;
+  border: 3px solid rgba(241, 196, 15,1.0);
+  transition: all 0.3s ease-out;
+}
+
+.btn:hover {
+  background: rgba(241, 196, 15,1.0);
+  color: black;
+}
+
+#btn-start {
+  position: absolute;
+  top: 50%;
+  left:50%;
+  transform: translate(-50%, -50%);
+}
+
+#launch-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  visibility:hidden;
+  position: absolute;
+  z-index: 10;
+  background-image: linear-gradient(45deg, black, rgba(46, 204, 113,0.2));
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  opacity:0;
+  transition: all 0.8s cubic-bezier(0.175, 0.885, 0.320, 1.275);
+}
+
+#launch-screen.is-visible {
+  opacity:1;
+  visibility:visible;
+}
+
+#launch-screen-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  padding: 50px;
+  transform: scale(0.8);
+  transition: all 0.8s cubic-bezier(0.175, 0.885, 0.320, 1.275);
+}
+
+
+#launch-screen.is-visible #launch-screen-content {
+  transform: scale(1);
+}
+
+#launch-screen-content h1 {
+  position: relative;
+  font-family: 'Bungee Outline', cursive;
+  color: rgba(46, 204, 113,1.0);
+  font-size: 4em;
+  margin: 0 0 0.4em 0;
+}
+
+
+#launch-screen-content p {
+  font-family: 'Space Mono', monospace;
+  color:#ccc;
+  font-size: 1em;
+  margin: 0 0 3em 0;
+}
+
+#lastScore {display:none;}
+#lastScore.is-visible {display:block;}
+
+#lastScore__number {color:rgba(231, 76, 60,1.0);}
+
+		</style>
+	</head>
+	<body>
+	<div id="app">
+  <div id="score"></div>
+  <svg id="svg"></svg>
+  
+  <div id="launch-screen" class="is-visible">
+    
+    <div id="launch-screen-content">
+      <h1 id="launch-screen__title"></h1>
+      <p id="launch-screen__description"></p>
+      <button class="btn" id="start-btn">PLAY</button>
+    </div>
+  </div>
+  
+</div>
+<script type="text/javascript">
+	
+	////////////////
+// helpers
+////////////////
+
+function getDistance(obj1, obj2) {
+  return Math.floor(
+    Math.sqrt(Math.pow(obj1.cx - obj2.cx, 2) + Math.pow(obj1.cy - obj2.cy, 2))
+  );
+}
+
+function getRandomArbitrary(min, max) {
+  return Math.floor(Math.random() * (max - min) + min);
+}
+
+function comparator(a, b) {
+  if (a[1] < b[1]) return -1;
+  if (a[1] > b[1]) return 1;
+  return 0;
+}
+
+function difference(source, toRemove) {
+  return source.filter(function(value) {
+    return toRemove.indexOf(value) == -1;
+  });
+}
+
+////////////////
+// global vars
+////////////////
+
+var svg = document.getElementById("svg");
+var dotMatrix = document.createElementNS(
+  "http://www.w3.org/2000/svg",
+  "circle"
+);
+var lineMatrix = document.createElementNS("http://www.w3.org/2000/svg", "line");
+var screenW = window.innerWidth;
+var screenH = window.innerHeight;
+var totalDist = document.getElementById("distance");
+
+////////////////
+// line constructor
+////////////////
+
+function Line(x1, y1, x2, y2) {
+  this.x1 = x1;
+  this.y1 = y1;
+  this.x2 = x2;
+  this.y2 = y2;
+  this.el = document.createElementNS("http://www.w3.org/2000/svg", "line");
+  this.class = "line";
+  this.update = function(x1, y1, x2, y2) {
+    this.el.setAttribute("x1", x1 || this.x1);
+    this.el.setAttribute("y1", y1 || this.y1);
+    this.el.setAttribute("x2", x2 || this.x2);
+    this.el.setAttribute("y2", y2 || this.y2);
+    this.setAttr("class", this.class);
+  };
+  this.setAttr = function(attr, value) {
+    this.el.setAttribute(attr, value);
+  };
+  this.append = function() {
+    svg.insertBefore(this.el, svg.firstChild);
+  };
+}
+
+////////////////
+// dot constructor
+////////////////
+
+function Dot(r, cx, cy) {
+  this.r = r;
+  this.cx = cx;
+  this.cy = cy;
+  this.el = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+  this.class = "dot";
+  this.update = function() {
+    this.el.setAttribute("r", this.r);
+    this.el.setAttribute("cx", this.cx);
+    this.el.setAttribute("cy", this.cy);
+    this.setAttr("class", this.class);
+  };
+
+  // activates a dot
+  this.activate = function() {
+    for (i = 0; i < dots.num; i++) {
+      dots.list[i].setAttr("data-selected", "false");
+    }
+    this.setAttr("data-selected", "true");
+  };
+
+  this.visited = function() {
+    this.setAttr("data-visited", "true");
+  };
+
+  // sets attribute to element
+  this.setAttr = function(attr, value) {
+    this.el.setAttribute(attr, value);
+  };
+
+  // gets attribute to element
+  this.getAttr = function(attr) {
+    return this.el.getAttribute(attr);
+  };
+
+  // appends element to svg and attaches event listeners
+  this.append = function() {
+    svg.appendChild(this.el);
+    this.el.addEventListener("click", this.onClick);
+  };
+
+  // on click on element
+  this.onClick = function(event) {
+    //gets the id and the coords of the dot
+    var thisId = Number(event.target.getAttribute("data-id").substr(3, 2));
+    var thisCx = dots.list[thisId].cx;
+    var thisCy = dots.list[thisId].cy;
+
+    // calculates the distance between dots
+    var distances = [];
+    for (i = 0; i < dots.num; i++) {
+      distances[i] = [i, getDistance(dots.selected, dots.list[i])];
+    }
+    distances.sort(comparator);
+    distances.splice(0, 1);
+    var distancesLeft = [];
+    for (i = 0; i < distances.length; i++) {
+      if (dots.left.includes(distances[i][0])) {
+        distancesLeft.push(distances[i][0]);
+      }
+    }
+
+    //if the element is the nearest
+    if (thisId == distancesLeft[0] && dots.left.includes(thisId)) {
+      // calculates distances
+      var newDistance = getDistance(dots.list[thisId], dots.selected);
+
+      app.score.update(1); // punteggio x numero di poi
+      // app.score.update(newDistance); punteggio x distanza
+
+      //sets the active class to the selected dot
+      dots.list[thisId].activate();
+      dots.list[thisId].visited();
+
+      // creates the line
+      lines.list.push(
+        new Line(
+          dots.selected.cx,
+          dots.selected.cy,
+          dots.list[thisId].cx,
+          dots.list[thisId].cy
+        )
+      );
+      lines.list[lines.list.length - 1].update();
+      lines.list[lines.list.length - 1].append();
+
+      // creates the preview line
+      //TODO: eliminare le vecchie preline che rimangono vive
+
+      svg.addEventListener("mousemove", function prelineMove(e) {
+        mouseX = e.pageX;
+        mouseY = e.pageY;
+        app.preline.update(thisCx, thisCy, mouseX, mouseY);
+      });
+
+      //saves the selected dots coordinates
+      dots.selected.id = thisId;
+      dots.selected.cx = thisCx;
+      dots.selected.cy = thisCy;
+
+      //removes the dot from the list of remaining dots
+      for (i = 0; i < dots.left.length; i++) {
+        if (dots.left[i] === thisId) {
+          dots.left.splice(i, 1);
+        }
+      }
+
+      if (dots.left.length == 0) {
+        app.end(true);
+      }
+    } else {
+      app.end(false);
+    }
+  };
+}
+
+////////////////
+// lines group
+////////////////
+
+var lines = {
+  list: []
+};
+
+////////////////
+// dots group
+////////////////
+
+var dots = {};
+dots.num = 20;
+dots.list = [];
+dots.start = 0;
+dots.selected = {};
+dots.selected.id = dots.start;
+dots.left = [];
+dots.preline;
+
+////////////////
+// app
+////////////////
+
+var app = {};
+
+app.level = 4;
+
+app.score = {};
+app.score.number = 0;
+app.score.el = document.getElementById("score");
+app.score.update = function(score) {
+  app.score.number += score;
+  app.score.el.textContent = app.score.number;
+};
+
+app.score.reset = function() {
+  app.score.number = 0;
+  app.score.update(0);
+};
+
+app.results = function(points) {
+  if (points == "reset") {
+    sessionStorage.setItem("results", 0);
+  } else {
+    if (!sessionStorage.getItem("results")) {
+      sessionStorage.setItem("results", points);
+    } else {
+      var newscore = parseInt(sessionStorage.getItem("results")) + points;
+      sessionStorage.setItem("results", newscore);
+    }
+  }
+};
+
+app.launchScreen = function(lastScore, title, description, btnText) {
+  app.launchScreen.el = document.getElementById("launch-screen");
+  app.launchScreen.el.setAttribute("class", "is-visible");
+
+  var launchScreenTitle = document.getElementById("launch-screen__title");
+  launchScreenTitle.textContent = title;
+
+  var launchScreenDescription = document.getElementById(
+    "launch-screen__description"
+  );
+  launchScreenDescription.textContent = description;
+
+  app.launchScreen.btn = document.getElementById("start-btn");
+  app.launchScreen.btn.textContent = btnText;
+
+  app.launchScreen.btn.addEventListener("click", function lauch() {
+    app.launchScreen.el.setAttribute("class", "");
+    app.start(app.level);
+    app.launchScreen.btn.removeEventListener("click", lauch);
+  });
+};
+
+app.preline = new Line(0, 0, 200, 200);
+app.preline.setAttr("id", "preline");
+
+app.start = function(dotsNum) {
+  dots.num = dotsNum;
+
+  for (i = 0; i < dots.num; i++) {
+    var cx = getRandomArbitrary(10, screenW - 10);
+    var cy = getRandomArbitrary(10, screenH - 10);
+
+    dots.list[i] = new Dot(8, cx, cy);
+    dots.list[i].setAttr("data-id", "id-" + i);
+    dots.list[i].setAttr(
+      "style", 
+      "animation-delay:" + i / 10 + "s; transform-origin: " + cx + 'px ' + cy + 'px;');
+    dots.list[i].update();
+    dots.list[i].append();
+    dots.left.push(i);
+
+    if (i == dots.start) {
+      dots.selected.cx = dots.list[dots.start].cx;
+      dots.selected.cy = dots.list[dots.start].cy;
+      dots.list[dots.start].setAttr("class", "dot dot--starting");
+      dots.left.splice(i, 1);
+    }
+
+    // adds the preline
+
+    app.preline.update(
+      dots.selected.cx,
+      dots.selected.cy,
+      dots.selected.cx,
+      dots.selected.cy
+    );
+    app.preline.append();
+
+    svg.addEventListener("mousemove", function prelineMove(e) {
+      mouseX = e.pageX;
+      mouseY = e.pageY;
+      app.preline.update(dots.selected.cx, dots.selected.cy, mouseX, mouseY);
+    });
+  }
+
+  // sets starting point
+  dots.list[dots.start].setAttr("data-selected", "true");
+};
+
+app.end = function(win) {
+  if (win) {
+    app.level += 4;
+    app.results(app.score.number);
+  } else {
+    app.level = 4;
+  }
+
+  dots.list = [];
+  dots.selected = {};
+  dots.left.length = 0;
+  svg.innerHTML = "";
+
+  if (win) {
+    app.launchScreen(
+      app.score.number,
+      "Well done!",
+      "Your score is: " + sessionStorage.getItem("results") + ' The next level will be harder.',
+      "PLAY NEXT LEVEL"
+    );
+  } else {
+    app.launchScreen(
+      0,
+      "Game over!",
+      "Your final score is: " + sessionStorage.getItem("results"),
+      "PLAY AGAIN"
+    );
+    app.results("reset");
+    app.score.reset();
+  }
+};
+
+app.launchScreen(
+  0,
+  "Path finder",
+  "Find the nearest yellow dot.",
+  "PLAY"
+);
+
+</script>
+	</body>
+</html>
