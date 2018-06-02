@@ -1,0 +1,136 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+ <HEAD>
+  <TITLE> 彩色水晶球 </TITLE>
+  <META NAME="Generator" CONTENT="EditPlus">
+  <META NAME="Author" CONTENT="">
+  <META NAME="Keywords" CONTENT="">
+  <META NAME="Description" CONTENT="">
+  <style>
+   body {
+  background-color: #111;
+}
+
+.ball {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  margin: auto;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  transform-style: preserve-3d;
+  animation: rotate 10s linear infinite;
+  transform: rotateY(60deg);
+}
+@keyframes rotate {
+  0% {
+    transform: rotateX(30deg) rotateY(0);
+  }
+  100% {
+    transform: rotateX(30deg) rotateY(360deg);
+  }
+}
+.ball__item {
+  position: absolute;
+  margin: auto;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  box-shadow: 0 0 0 0 transparent, 0px 175px 0 0 #e06e87, 14.6436225832px 174.3862503687px 0 0 #dbee5c, 29.1845306753px 172.5493064873px 0 0 #5140f7, 43.5207302539px 169.5020531975px 0 0 #bf91fe, 57.5516631793px 165.2658647916px 0 0 #d96355, 71.1789125383px 159.8704550875px 0 0 #be4ed8, 84.3068929678px 153.3536690077px 0 0 #d59e16, 96.8435211176px 145.7612171243px 0 0 #cd6736, 108.7008615487px 137.146355032px 0 0 #849eeb, 119.7957435375px 127.5695097987px 0 0 #cb55f9, 130.0503444586px 117.0978561128px 0 0 #b6e23b, 139.3927356542px 105.8048451009px 0 0 #c9f6cd, 147.7573869629px 93.7696891213px 0 0 #87c933, 155.0856263655px 81.076806146px 0 0 #ab6846, 161.326051528px 67.8152276291px 0 0 #e059cc, 166.4348903517px 54.0779740156px 0 0 #eb5815, 170.3763080028px 39.9614022693px 0 0 #7dd2ed, 173.1226582685px 25.5645299984px 0 0 #ab883d, 174.6546774749px 10.9883409176px 0 0 #9467c3, 174.9616196081px -3.6649234796px 0 0 #8f5c12, 174.0413316894px -18.2924810719px 0 0 #23b726, 171.9002688775px -32.7917300525px 0 0 #71b6e1, 168.5534491896px -47.0609686077px 0 0 #fc3a05, 164.0243481611px -61.0001082813px 0 0 #2d1a15, 158.3447341815px -74.5113760239px 0 0 #b00255, 151.5544456623px -87.5px 0 0 #d99ab1, 143.7011115984px -99.8748743448px 0 0 #5558b9, 134.8398174857px -111.549198206px 0 0 #3055b6, 125.0327189357px -122.4410845898px 0 0 #26bbe6, 114.3486056983px -132.474134739px 0 0 #87e3b5, 102.8624191512px -141.5779740155px 0 0 #4c4d6a, 90.6547266403px -149.6887455279px 0 0 #d86b7c, 77.8111563574px -156.7495580415px 0 0 #e22649, 64.4217967199px -162.7108850297px 0 0 #d07b1a, 50.5805644654px -167.5309120666px 0 0 #9c1b12, 36.3845458934px -171.1758301255px 0 0 #6354d8, 21.9333158744px -173.6200727246px 0 0 #7d9cee, 7.3282394039px -174.8464952574px 0 0 #5657e9, -7.3282394002px -174.8464952496px 0 0 #eea5ad, -21.9333158693px -173.6200726987px 0 0 #0f59c7, -36.3845458852px -171.1758300738px 0 0 #8c99f0, -50.5805644513px -167.5309119741px 0 0 #f0ee20, -64.4217966954px -162.710884871px 0 0 #62f631, -77.8111563155px -156.7495577745px 0 0 #622cad, -90.6547265692px -149.6887450852px 0 0 #e6a00f, -102.8624190321px -141.5779732904px 0 0 #153f0c, -114.348605501px -132.4741335642px 0 0 #5dfac1, -125.0327186126px -122.4410827064px 0 0 #05ab01, -134.8398169619px -111.5491952165px 0 0 #2c3e6d, -143.7011107576px -99.874869645px 0 0 #ab1723, -151.5544443257px -87.499992679px 0 0 #7d98c6, -158.3447320763px -74.51136472px 0 0 #ca680c, -164.0243448744px -61.0000909751px 0 0 #1f5081, -168.553444102px -47.0609423273px 0 0 #72c276, -171.9002610668px -32.7916904568px 0 0 #7eba29, -174.0413197925px -18.2924218641px 0 0 #7d898c, -174.9616016248px -3.6648355896px 0 0 #b04d27, -174.6546504908px 10.9884704693px 0 0 #c8b377, -173.1226180652px 25.564719667px 0 0 #8574c4, -170.3762485138px 39.9616781345px 0 0 #54f86f, -166.4348029073px 54.0783727128px 0 0 #da8cb3, -161.3259238127px 67.8158003265px 0 0 #8c6959, -155.0854409868px 81.0776239121px 0 0 #cc8b86, -147.7571194968px 93.7708501347px 0 0 #39b5b3, -139.3923519899px 105.8064842854px 0 0 #6eb99f, -130.0497972083px 117.1001579554px 0 0 #06ba06, -119.7949672065px 127.5727253237px 0 0 #25eee0, -108.6997660663px 137.1508241795px 0 0 #1a3163, -96.8419832129px 145.7673981286px 0 0 #0350ce, -84.3047447221px 153.3621768056px 0 0 #a0028e, -71.1759262535px 159.8821113292px 0 0 #375447, -57.5475314602px 165.2817627064px 0 0 #f47784, -43.5150398945px 169.5236414064px 0 0 #765e41, -29.1767285545px 172.578496899px 0 0 #8148dc, -14.6329712941px 174.4255565798px 0 0 #36c84b;
+}
+.ball__item:nth-child(1) {
+  transform: rotateY(9deg);
+}
+.ball__item:nth-child(2) {
+  transform: rotateY(18deg);
+}
+.ball__item:nth-child(3) {
+  transform: rotateY(27deg);
+}
+.ball__item:nth-child(4) {
+  transform: rotateY(36deg);
+}
+.ball__item:nth-child(5) {
+  transform: rotateY(45deg);
+}
+.ball__item:nth-child(6) {
+  transform: rotateY(54deg);
+}
+.ball__item:nth-child(7) {
+  transform: rotateY(63deg);
+}
+.ball__item:nth-child(8) {
+  transform: rotateY(72deg);
+}
+.ball__item:nth-child(9) {
+  transform: rotateY(81deg);
+}
+.ball__item:nth-child(10) {
+  transform: rotateY(90deg);
+}
+.ball__item:nth-child(11) {
+  transform: rotateY(99deg);
+}
+.ball__item:nth-child(12) {
+  transform: rotateY(108deg);
+}
+.ball__item:nth-child(13) {
+  transform: rotateY(117deg);
+}
+.ball__item:nth-child(14) {
+  transform: rotateY(126deg);
+}
+.ball__item:nth-child(15) {
+  transform: rotateY(135deg);
+}
+.ball__item:nth-child(16) {
+  transform: rotateY(144deg);
+}
+.ball__item:nth-child(17) {
+  transform: rotateY(153deg);
+}
+.ball__item:nth-child(18) {
+  transform: rotateY(162deg);
+}
+.ball__item:nth-child(19) {
+  transform: rotateY(171deg);
+}
+.ball__item:nth-child(20) {
+  transform: rotateY(180deg);
+}
+
+  </style>
+ </HEAD>
+
+ <BODY>
+  
+<div class="ball">
+  <div class="ball__item"></div>
+  <div class="ball__item"></div>
+  <div class="ball__item"></div>
+  <div class="ball__item"></div>
+  <div class="ball__item"></div>
+  <div class="ball__item"></div>
+  <div class="ball__item"></div>
+  <div class="ball__item"></div>
+  <div class="ball__item"></div>
+  <div class="ball__item"></div>
+  <div class="ball__item"></div>
+  <div class="ball__item"></div>
+  <div class="ball__item"></div>
+  <div class="ball__item"></div>
+  <div class="ball__item"></div>
+  <div class="ball__item"></div>
+  <div class="ball__item"></div>
+  <div class="ball__item"></div>
+  <div class="ball__item"></div>
+  <div class="ball__item"></div>
+</div>
+ </BODY>
+</HTML>
